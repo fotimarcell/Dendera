@@ -1,0 +1,3 @@
+Azonos szög (0,1° pontossággal, ahogy tárolva van): 869 pár, 1738 fuga, 429 pár nélkül.
+1 fokon belül: 1073 pár, 2146 fuga, 21 pár nélkül.
+A 0° és a 180° ugyanaz a vonal.
