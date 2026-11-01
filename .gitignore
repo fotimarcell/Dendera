@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.vercel/
+.env
+.env.*
+*.local
+.tanstack/
+artifacts/
+attachments/
+screenshots/
+*.zip
+dendera-letoltes/
+.project_id
+.DS_Store
+public/padlo-18-egbolt.sqlite
