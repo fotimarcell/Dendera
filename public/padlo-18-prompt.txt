@@ -1,0 +1,41 @@
+Feladat: számozott padlóburkolatból bővíthető kőgeometriai adatbázis
+
+Egy felülnézeti burkolattervből készíts kőleltárt. A rajz minden köve kapjon stabil azonosítót, a képére kerüljön a kód, és ugyanebből az azonosítóból készüljön letölthető, később bővíthető adatbázis. A cél nem szépítés, hanem vágási és beépítési geometria: egy kő a rajzon és az adatbázisban ugyanaz a tárgy legyen.
+
+Bemenet
+- Egy burkolatterv (fénykép vagy export). Észak a rajz teteje, kelet jobbra.
+- Ha a felhasználó már adott azonosítókat, azokat tartsd meg. Új kő csak a sorozat végére kerüljön, a meglévő számokat ne számozd újra.
+- Ha nincs méretarány, minden hossz pixelben legyen, és legyen egy üres px_per_mm mező. Ha a felhasználó megadja, hány milliméter egy pixel, a hossz = px × px_per_mm, a terület = px² × px_per_mm².
+
+Azonosítók
+- Külső sötétzöld keret: K1, K2, … óramutató járása szerint, a legészakibb keretkőtől. A nagy keretkövek is kövek, nem háttér.
+- Belső világoszöld kövek: 1, 2, … soronként felülről lefelé, azon belül balról jobbra.
+- Narancssárga kövek: N1, N2, … felülről lefelé. Ide tartozik minden kő, amit a felhasználó narancsra színez, és minden újonnan létrehozott, közrefogott területből készült kő.
+- Kékre színezett kövek megtartják az azonosítójukat (szám vagy N), csak a színük kék. A szin mező legyen kek.
+- Kihagyott követ pótolj. Ha a felhasználó azt mondja, hogy több jel egyetlen kő, vonjad össze, és egy azonosító maradjon. A fugát ne számozd kőnek, de ha a felhasználó azt kéri, hogy egy közrefogott területből csinálj követ, hozz létre ott egy új követ, számozd be, és a kért színre fesd.
+
+Geometria, minden kőre ugyanazzal a szabállyal
+- A körvonalat egyszerűsítsd sokszögre (jellemzően 3–6 csúcs). A csúcsokat óramutató járása szerint sorold, a legészakibb csúcstól (döntetlennél a nyugatibbtól). Az 1. él az 1. csúcsból indul. A belső szög sorszáma ugyanez a csúcs.
+- Él: hossz, és iránya északhoz képest. 0° = észak, az óramutató járása szerint nő, 90° = kelet.
+- Belső szög minden csúcsnál, ugyanebben a sorrendben. Négyszögnél az összeg 360°, ötszögnél 540°.
+- Átló: minden olyan csúcspár, ami nem él. Melyik két sorszámú csúcs között, a hossza, és az iránya északhoz képest.
+- Terület, kerület, oldalak száma, forma neve (háromszög, négyszög, ötszög, hatszög), hossztengely iránya északhoz képest (0–180°).
+- Középpont: x jobbra (kelet), y lefelé (dél), pixel, origó a kép bal felső sarka, jelmagyarázat nélkül.
+- Szomszéd: amelyik kő a fugán át érintkezik. Tárold az azonosítóját és hogy hány szögű. A szomszédok száma külön mező.
+
+Adatbázis, bővíthetően
+- SQLite, külön táblákkal, hogy új oszlop ne írja felül a geometriát:
+  - meta: észak, csúcssorrend, koordináta, egység, px_per_mm, bővítés szabálya
+  - kovek: id, sorozat (belso | keret | narancs), szin, oldalak, forma, terulet_px2, kerulet_px, tengely_eszak_fok, szomszedok_szama, kozep_x_px, kozep_y_px, megjegyzes (üres), extra (üres JSON)
+  - elek: ko_id, sorszam, hossz_px, irany_eszak_fok, belso_szog_fok, x1, y1, x2, y2
+  - atlok: ko_id, csucs_a, csucs_b, hossz_px, irany_eszak_fok
+  - szomszedok: ko_id, szomszed_id, szomszed_oldalak
+- Mellé CSV ugyanebből: kovek.csv, elek.csv, atlok.csv, szomszedok.csv. A listák egy cellában szóközzel legyenek, hogy Excelben is megnyíljanak.
+- A megjegyzes és az extra mezőt hagyd üresen. Ide kerül később az anyag, a vágási állapot, a szállító vagy bármi, amit a felhasználó hozzáír. Meglévő id-t ne változtass, ha csak bővít.
+
+Kimenet
+- A számozott rajz, olvasható kóddal a kövön.
+- A zip: SQLite + CSV + ez a szabály röviden.
+- Rövid ellenőrzés: négyszög szögeinek összege ≈ 360°, egy megnevezett új kő szomszédai a közrefogó azonosítók, a keret K sora óramutató szerint záródik.
+
+Ne találj ki méretarányt, anyagot vagy olyan követ, amit a felhasználó nem kért. Ha egy közrefogott helyen a fuga és a szomszédok összeérnek, és a felhasználó mégis követ kér oda, hozd létre a követ, és írd rá, hogy szerkesztett alak, nem a fuga maga.
